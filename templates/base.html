@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Smart US Travel Planner{% endblock %}</title>
+    {% block head %}{% endblock %}
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #2c3e50;
+            background-color: #fefdf8;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #f4d03f 0%, #f39c12 100%);
+            color: #2c3e50;
+            padding: 2rem 0;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            color: #2c3e50;
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            color: #34495e;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid #e8e8e8;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e1e5e9;
+            border-radius: 4px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+            background-color: white;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #f39c12;
+            box-shadow: 0 0 0 3px rgba(243, 156, 18, 0.1);
+        }
+        
+        .btn {
+            background: #f39c12;
+            color: white;
+            padding: 0.75rem 2rem;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn:hover {
+            background: #e67e22;
+        }
+        
+        .btn-secondary {
+            background: #95a5a6;
+        }
+        
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .place-card {
+            border: 2px solid #f8f4e0;
+            border-radius: 8px;
+            padding: 1.5rem;
+            background: #fefdf8;
+        }
+        
+        .place-card h3 {
+            color: #f39c12;
+            margin-bottom: 1rem;
+        }
+        
+        .place-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        
+        .place-inputs .form-group:nth-child(1),
+        .place-inputs .form-group:nth-child(2) {
+            grid-column: 1 / -1;
+        }
+        
+        .remove-place {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 1rem;
+        }
+        
+        .remove-place:hover {
+            background: #c0392b;
+        }
+        
+        .add-place {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .add-place:hover {
+            background: #229954;
+        }
+        
+        .itinerary-item {
+            background: #fefdf8;
+            border-left: 4px solid #f39c12;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 0 4px 4px 0;
+        }
+        
+        .itinerary-item h4 {
+            color: #f39c12;
+            margin-bottom: 0.5rem;
+        }
+        
+        .time-info {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .map-container {
+            text-align: center;
+            margin: 2rem 0;
+        }
+        
+        .map-container img {
+            max-width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .legend {
+            background: #fefdf8;
+            padding: 1rem;
+            border-radius: 4px;
+            margin-top: 1rem;
+            border: 1px solid #f8f4e0;
+        }
+        
+        .legend ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .legend li {
+            padding: 0.25rem 0;
+            border-bottom: 1px solid #f8f4e0;
+        }
+        
+        .legend li:last-child {
+            border-bottom: none;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #f4d03f 0%, #f39c12 100%);
+            color: #2c3e50;
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .stat-card h3 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: #2c3e50;
+        }
+        
+        .error {
+            background: #fdf2f2;
+            color: #c53030;
+            padding: 1rem;
+            border-radius: 4px;
+            border: 1px solid #fed7d7;
+            margin-bottom: 1rem;
+        }
+        
+        .search-container {
+            position: relative;
+        }
+        
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #e1e5e9;
+            border-top: none;
+            border-radius: 0 0 4px 4px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .search-result-item {
+            padding: 0.75rem;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background-color 0.2s;
+        }
+        
+        .search-result-item:hover {
+            background-color: #fefdf8;
+        }
+        
+        .search-result-item:last-child {
+            border-bottom: none;
+        }
+        
+        .search-result-main {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .search-result-secondary {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 0.25rem;
+        }
+        
+        .map-controls {
+            margin-bottom: 1rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .btn-small {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            background: #95a5a6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .btn-small:hover {
+            background: #7f8c8d;
+        }
+        
+        .map-container {
+            margin-top: 2rem;
+        }
+        
+        .legend {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #fefdf8;
+            border-radius: 4px;
+            border: 1px solid #f8f4e0;
+        }
+        
+        .legend h4 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        
+        .legend ul {
+            margin: 0;
+            padding-left: 1.5rem;
+        }
+        
+        .legend li {
+            margin-bottom: 0.5rem;
+            color: #666;
+        }
+        
+        h2, h3, h4 {
+            color: #2c3e50;
+        }
+        
+        ul {
+            color: #555;
+        }
+        
+        li {
+            margin-bottom: 0.5rem;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .place-inputs {
+                grid-template-columns: 1fr;
+            }
+            
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <h1>Smart US Travel Planner</h1>
+            <p>Optimize your travel routes with advanced algorithms</p>
+        </div>
+    </div>
+    
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+    
+    <script>
+        // Add place functionality
+        function addPlace() {
+            const placesContainer = document.getElementById('places-container');
+            const placeCount = placesContainer.children.length;
+            
+            const placeCard = document.createElement('div');
+            placeCard.className = 'place-card';
+            placeCard.innerHTML = `
+                <h3>Place ${placeCount + 1}</h3>
+                <div class="place-inputs">
+                    <div class="form-group">
+                        <label for="place_name_${placeCount}">Place Name</label>
+                        <div class="search-container">
+                            <input type="text" id="place_name_${placeCount}" name="place_name" class="form-control place-name-search" required>
+                            <div class="search-results" id="place-search-results-${placeCount}"></div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="address_${placeCount}">Address</label>
+                        <div class="search-container">
+                            <input type="text" id="address_${placeCount}" name="address" class="form-control address-search" placeholder="Search for a place..." required>
+                            <div class="search-results" id="search-results-${placeCount}"></div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="open_time_${placeCount}">Opening Time</label>
+                        <input type="time" id="open_time_${placeCount}" name="open_time" class="form-control" value="09:00" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="close_time_${placeCount}">Closing Time</label>
+                        <input type="time" id="close_time_${placeCount}" name="close_time" class="form-control" value="17:00" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="visit_duration_${placeCount}">Visit Duration (minutes)</label>
+                        <input type="number" id="visit_duration_${placeCount}" name="visit_duration" class="form-control" min="1" max="480" value="60" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="preference_${placeCount}">Preference (1-5)</label>
+                        <select id="preference_${placeCount}" name="preference" class="form-control" required>
+                            <option value="1">1 - Low</option>
+                            <option value="2">2</option>
+                            <option value="3" selected>3 - Medium</option>
+                            <option value="4">4</option>
+                            <option value="5">5 - High</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="preferred_start_time_${placeCount}">Preferred Start Time (Optional)</label>
+                        <input type="time" id="preferred_start_time_${placeCount}" name="preferred_start_time" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="preferred_end_time_${placeCount}">Preferred End Time (Optional)</label>
+                        <input type="time" id="preferred_end_time_${placeCount}" name="preferred_end_time" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="timing_importance_${placeCount}">Timing Importance (1-5)</label>
+                        <select id="timing_importance_${placeCount}" name="timing_importance" class="form-control" required>
+                            <option value="1" selected>1 - Low</option>
+                            <option value="2">2</option>
+                            <option value="3">3 - Medium</option>
+                            <option value="4">4</option>
+                            <option value="5">5 - High</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="button" class="remove-place" onclick="removePlace(this)">Remove Place</button>
+            `;
+            
+            placesContainer.appendChild(placeCard);
+            
+            // Initialize search for the new place
+            initializePlaceSearch();
+        }
+        
+        function removePlace(button) {
+            const placeCard = button.parentElement;
+            placeCard.remove();
+            
+            // Renumber remaining places
+            const placeCards = document.querySelectorAll('.place-card');
+            placeCards.forEach((card, index) => {
+                const title = card.querySelector('h3');
+                title.textContent = `Place ${index + 1}`;
+            });
+        }
+        
+        // Place search functionality
+        let searchTimeout;
+        
+        function initializePlaceSearch() {
+            const searchInputs = document.querySelectorAll('.address-search');
+            const placeNameInputs = document.querySelectorAll('.place-name-search');
+            console.log('Found address search inputs:', searchInputs.length);
+            console.log('Found place name search inputs:', placeNameInputs.length);
+            
+            // Setup address search
+            searchInputs.forEach((input, index) => {
+                console.log('Setting up address search for index:', index);
+                const resultsContainer = document.getElementById(`search-results-${index}`);
+                
+                input.addEventListener('input', function() {
+                    const query = this.value.trim();
+                    console.log('Address input event triggered for index:', index, 'query:', query);
+                    
+                    clearTimeout(searchTimeout);
+                    
+                    if (query.length < 3) {
+                        resultsContainer.style.display = 'none';
+                        return;
+                    }
+                    
+                    searchTimeout = setTimeout(() => {
+                        console.log('Making address search request for:', query);
+                        searchPlaces(query, index);
+                    }, 300);
+                });
+                
+                document.addEventListener('click', function(e) {
+                    if (!input.contains(e.target) && !resultsContainer.contains(e.target)) {
+                        resultsContainer.style.display = 'none';
+                    }
+                });
+            });
+            
+            // Setup place name search
+            placeNameInputs.forEach((input, index) => {
+                console.log('Setting up place name search for index:', index);
+                const resultsContainer = document.getElementById(`place-search-results-${index}`);
+                
+                input.addEventListener('input', function() {
+                    const query = this.value.trim();
+                    console.log('Place name input event triggered for index:', index, 'query:', query);
+                    
+                    clearTimeout(searchTimeout);
+                    
+                    if (query.length < 3) {
+                        resultsContainer.style.display = 'none';
+                        return;
+                    }
+                    
+                    searchTimeout = setTimeout(() => {
+                        console.log('Making place name search request for:', query);
+                        searchPlaces(query, index, 'place');
+                    }, 300);
+                });
+                
+                document.addEventListener('click', function(e) {
+                    if (!input.contains(e.target) && !resultsContainer.contains(e.target)) {
+                        resultsContainer.style.display = 'none';
+                    }
+                });
+            });
+        }
+        
+        function searchPlaces(query, index, type = 'address') {
+            console.log('searchPlaces called with query:', query, 'index:', index, 'type:', type);
+            const resultsContainer = document.getElementById(type === 'place' ? `place-search-results-${index}` : `search-results-${index}`);
+            
+            fetch(`/api/places/search?query=${encodeURIComponent(query)}`)
+                .then(response => {
+                    console.log('Search response status:', response.status);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Search response data:', data);
+                    if (data.error) {
+                        console.error('Search error:', data.error);
+                        return;
+                    }
+                    
+                    displaySearchResults(data.predictions, index, type);
+                })
+                .catch(error => {
+                    console.error('Search failed:', error);
+                });
+        }
+        
+        function displaySearchResults(predictions, index, type = 'address') {
+            console.log('displaySearchResults called with predictions:', predictions, 'index:', index, 'type:', type);
+            const resultsContainer = document.getElementById(type === 'place' ? `place-search-results-${index}` : `search-results-${index}`);
+            console.log('Found results container:', resultsContainer);
+            
+            if (!resultsContainer) {
+                console.error('Results container not found for index:', index, 'type:', type);
+                return;
+            }
+            
+            const searchInput = document.querySelector(type === 'place' ? `#place_name_${index}` : `#address_${index}`);
+            
+            if (predictions.length === 0) {
+                console.log('No predictions, hiding container');
+                resultsContainer.style.display = 'none';
+                return;
+            }
+            
+            console.log('Creating search results for', predictions.length, 'predictions');
+            resultsContainer.innerHTML = '';
+            
+            predictions.forEach(prediction => {
+                const resultItem = document.createElement('div');
+                resultItem.className = 'search-result-item';
+                resultItem.innerHTML = `
+                    <div class="search-result-main">${prediction.main_text}</div>
+                    <div class="search-result-secondary">${prediction.secondary_text}</div>
+                `;
+                
+                resultItem.addEventListener('click', () => {
+                    selectPlace(prediction, index, type);
+                });
+                
+                resultsContainer.appendChild(resultItem);
+            });
+            
+            console.log('Setting container display to block');
+            resultsContainer.style.display = 'block';
+        }
+        
+        function selectPlace(prediction, index, type = 'address') {
+            const searchInput = document.querySelector(type === 'place' ? `#place_name_${index}` : `#address_${index}`);
+            const placeNameInput = document.querySelector(`#place_name_${index}`);
+            const addressInput = document.querySelector(`#address_${index}`);
+            const resultsContainer = document.getElementById(type === 'place' ? `place-search-results-${index}` : `search-results-${index}`);
+            
+            if (type === 'place') {
+                // Set the place name
+                searchInput.value = prediction.main_text;
+                // Set the address if it's empty
+                if (!addressInput.value.trim()) {
+                    addressInput.value = prediction.description;
+                }
+            } else {
+                // Set the address
+                searchInput.value = prediction.description;
+                // Set the place name if it's empty
+                if (!placeNameInput.value.trim()) {
+                    placeNameInput.value = prediction.main_text;
+                }
+            }
+            
+            // Hide results
+            resultsContainer.style.display = 'none';
+            
+            // Get additional details if available
+            if (prediction.place_id) {
+                getPlaceDetails(prediction.place_id, index);
+            }
+        }
+        
+        function getPlaceDetails(placeId, index) {
+            fetch(`/api/places/details/${placeId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        console.error('Details error:', data.error);
+                        return;
+                    }
+                    
+                    // Update place name and address with official data
+                    const placeNameInput = document.querySelector(`#place_name_${index}`);
+                    const addressInput = document.querySelector(`#address_${index}`);
+                    const openTimeInput = document.querySelector(`#open_time_${index}`);
+                    const closeTimeInput = document.querySelector(`#close_time_${index}`);
+                    
+                    if (data.name) {
+                        placeNameInput.value = data.name;
+                    }
+                    
+                    if (data.address) {
+                        addressInput.value = data.address;
+                    }
+                    
+                    // Update opening hours if available
+                    if (data.opening_hours && data.opening_hours.weekday_text) {
+                        // Try to parse opening hours for today
+                        const today = new Date().getDay(); // 0 = Sunday, 1 = Monday, etc.
+                        const weekdayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+                        const todayName = weekdayNames[today];
+                        
+                        const todayHours = data.opening_hours.weekday_text.find(day => 
+                            day.startsWith(todayName)
+                        );
+                        
+                        if (todayHours) {
+                            // Extract times from format like "Monday: 9:00 AM – 5:00 PM"
+                            const timeMatch = todayHours.match(/(\d{1,2}):(\d{2})\s*(AM|PM)\s*–\s*(\d{1,2}):(\d{2})\s*(AM|PM)/);
+                            if (timeMatch) {
+                                const openHour = parseInt(timeMatch[1]);
+                                const openMinute = parseInt(timeMatch[2]);
+                                const openPeriod = timeMatch[3];
+                                const closeHour = parseInt(timeMatch[4]);
+                                const closeMinute = parseInt(timeMatch[5]);
+                                const closePeriod = timeMatch[6];
+                                
+                                // Convert to 24-hour format
+                                let openHour24 = openHour;
+                                let closeHour24 = closeHour;
+                                
+                                if (openPeriod === 'PM' && openHour !== 12) openHour24 += 12;
+                                if (openPeriod === 'AM' && openHour === 12) openHour24 = 0;
+                                if (closePeriod === 'PM' && closeHour !== 12) closeHour24 += 12;
+                                if (closePeriod === 'AM' && closeHour === 12) closeHour24 = 0;
+                                
+                                openTimeInput.value = `${openHour24.toString().padStart(2, '0')}:${openMinute.toString().padStart(2, '0')}`;
+                                closeTimeInput.value = `${closeHour24.toString().padStart(2, '0')}:${closeMinute.toString().padStart(2, '0')}`;
+                            }
+                        }
+                    }
+                    
+                    // Show additional info if available
+                    showPlaceInfo(data, index);
+                })
+                .catch(error => {
+                    console.error('Details failed:', error);
+                });
+        }
+        
+        function showPlaceInfo(placeData, index) {
+            // Create or update info display
+            let infoDiv = document.querySelector(`#place-info-${index}`);
+            if (!infoDiv) {
+                infoDiv = document.createElement('div');
+                infoDiv.id = `place-info-${index}`;
+                infoDiv.className = 'place-info';
+                infoDiv.style.cssText = 'background: #e8f4fd; padding: 0.5rem; border-radius: 4px; margin-top: 0.5rem; font-size: 0.9rem;';
+                
+                const placeCard = document.querySelector(`#place_name_${index}`).closest('.place-card');
+                placeCard.appendChild(infoDiv);
+            }
+            
+            let infoText = '';
+            
+            if (placeData.rating) {
+                infoText += `Rating: ${placeData.rating}/5 (${placeData.user_ratings_total || 0} reviews) `;
+            }
+            
+            if (placeData.price_level !== undefined) {
+                const priceLevels = ['Free', 'Inexpensive', 'Moderate', 'Expensive', 'Very Expensive'];
+                infoText += `Price: ${priceLevels[placeData.price_level] || 'Unknown'} `;
+            }
+            
+            if (placeData.business_status) {
+                infoText += `Status: ${placeData.business_status} `;
+            }
+            
+            if (placeData.opening_hours && placeData.opening_hours.open_now !== undefined) {
+                infoText += `Currently: ${placeData.opening_hours.open_now ? 'Open' : 'Closed'} `;
+            }
+            
+            if (infoText) {
+                infoDiv.innerHTML = infoText;
+                infoDiv.style.display = 'block';
+            } else {
+                infoDiv.style.display = 'none';
+            }
+        }
+        
+        // Initialize search when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, initializing place search...');
+            initializePlaceSearch();
+            console.log('Place search initialization complete');
+        });
+    </script>
+</body>
+</html> 

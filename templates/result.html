@@ -1,0 +1,353 @@
+{% extends "base.html" %}
+
+{% block title %}Your Travel Plan - Smart US Travel Planner{% endblock %}
+
+{% block head %}
+<script src="https://maps.googleapis.com/maps/api/js?key={{ Config.GOOGLE_API_KEY }}&libraries=geometry,places"></script>
+<style>
+    body {
+        background-color: #fefdf8;
+    }
+    
+    .header {
+        background: linear-gradient(135deg, #f4d03f 0%, #f39c12 100%);
+        color: #2c3e50;
+    }
+    
+    .card {
+        background: white;
+        border: 1px solid #e8e8e8;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+    
+    .algorithm-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 2rem;
+        background: white;
+        border-radius: 6px;
+        overflow: hidden;
+        border: 1px solid #e8e8e8;
+    }
+    
+    .algorithm-table thead {
+        background: #f8f4e0;
+        color: #2c3e50;
+        border-bottom: 2px solid #f4d03f;
+    }
+    
+    .algorithm-table th {
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: #2c3e50;
+    }
+    
+    .algorithm-table td {
+        padding: 1rem;
+        border-bottom: 1px solid #f0f0f0;
+        vertical-align: top;
+    }
+    
+    .algorithm-table tbody tr:hover {
+        background-color: #fefdf8;
+    }
+    
+    .algorithm-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+    
+    .algorithm-name {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+    
+    .route-order {
+        font-size: 0.9rem;
+        color: #555;
+        line-height: 1.4;
+    }
+    
+    .route-arrow {
+        color: #f39c12;
+        font-weight: bold;
+        margin: 0 0.3rem;
+    }
+    
+    .metric-value {
+        font-weight: 600;
+        color: #2c3e50;
+        text-align: center;
+    }
+    
+    .best-route {
+        background: #fef9e7;
+        border-left: 3px solid #f39c12;
+    }
+    
+    .best-badge {
+        background: #f39c12;
+        color: white;
+        padding: 0.2rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        margin-left: 0.5rem;
+    }
+    
+    .comparison-header {
+        margin-bottom: 1.5rem;
+    }
+    
+    .comparison-title {
+        font-size: 1.4rem;
+        font-weight: 600;
+        color: #2c3e50;
+        margin: 0 0 0.5rem 0;
+    }
+    
+    .comparison-subtitle {
+        color: #666;
+        font-size: 0.9rem;
+        margin: 0;
+    }
+    
+    .btn {
+        background: #f39c12;
+        color: white;
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 4px;
+        font-size: 1rem;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+        transition: background-color 0.2s ease;
+    }
+    
+    .btn:hover {
+        background: #e67e22;
+    }
+    
+    .btn-secondary {
+        background: #95a5a6;
+    }
+    
+    .btn-secondary:hover {
+        background: #7f8c8d;
+    }
+    
+    h2, h3, h4 {
+        color: #2c3e50;
+    }
+    
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+    
+    ul {
+        color: #555;
+    }
+    
+    li {
+        margin-bottom: 0.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="comparison-header">
+        <h2 class="comparison-title">Route Optimization Results</h2>
+        <p class="comparison-subtitle">Comparison of all algorithms by travel time and distance</p>
+    </div>
+    
+    <table class="algorithm-table">
+        <thead>
+            <tr>
+                <th>Algorithm</th>
+                <th>Optimal Route</th>
+                <th>Total Time (min)</th>
+                <th>Total Distance (km)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for result in results %}
+            <tr{% if loop.first %} class="best-route"{% endif %}>
+                <td>
+                    <div class="algorithm-name">
+                        {{ result.algorithm }}
+                        {% if loop.first %}<span class="best-badge">Best</span>{% endif %}
+                    </div>
+                </td>
+                <td>
+                    <div class="route-order">
+                        {% for name in result.route_names %}
+                            <span>{{ name }}</span>{% if not loop.last %}<span class="route-arrow">→</span>{% endif %}
+                        {% endfor %}
+                    </div>
+                </td>
+                <td>
+                    <div class="metric-value">{{ result.total_time }}</div>
+                </td>
+                <td>
+                    <div class="metric-value">{{ (result.total_distance / 1000) | round(2) }}</div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Travel Time Matrix Section -->
+<div class="card">
+    <h3>Travel Time Matrix (minutes)</h3>
+    <div style="overflow-x:auto;">
+        <table class="algorithm-table" style="min-width:600px;">
+            <thead>
+                <tr>
+                    <th></th>
+                    {% for place in places %}
+                        <th>{{ place.place_name }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for i, row in enumerate(matrix_time) %}
+                <tr>
+                    <td><strong>{{ places[i].place_name }}</strong></td>
+                    {% for val in row %}
+                        <td style="text-align:center;">{{ val }}</td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Distance Matrix Section -->
+<div class="card">
+    <h3>Travel Distance Matrix (km)</h3>
+    <div style="overflow-x:auto;">
+        <table class="algorithm-table" style="min-width:600px;">
+            <thead>
+                <tr>
+                    <th></th>
+                    {% for place in places %}
+                        <th>{{ place.place_name }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for i, row in enumerate(matrix_distance) %}
+                <tr>
+                    <td><strong>{{ places[i].place_name }}</strong></td>
+                    {% for val in row %}
+                        <td style="text-align:center;">{{ (val / 1000) | round(2) }}</td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="card">
+    <h3>Trip Summary</h3>
+    <div class="grid">
+        <div>
+            <h4>Travel Settings</h4>
+            <ul>
+                <li><strong>Start Time:</strong> {{ start_time }}</li>
+                <li><strong>End Time:</strong> {{ end_time }}</li>
+                <li><strong>Travel Mode:</strong> {{ travel_mode|title }}</li>
+                <li><strong>Number of Days:</strong> {{ num_days }}</li>
+            </ul>
+        </div>
+        <div>
+            <h4>Places Visited</h4>
+            <ul>
+                {% for place in places %}
+                <li>{{ place.place_name }} ({{ place.visit_duration }} min)</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div style="text-align: center; margin-top: 2rem;">
+    <a href="/" class="btn btn-secondary">Plan Another Trip</a>
+</div>
+
+<script>
+    // Map control functions
+    function toggleMapSize(mapId) {
+        const mapElement = document.getElementById(mapId);
+        if (mapElement.style.height === '600px') {
+            mapElement.style.height = '400px';
+        } else {
+            mapElement.style.height = '600px';
+        }
+        
+        // Trigger resize event for Google Maps
+        if (window.google && window.google.maps) {
+            const map = window.google.maps.Map.get(mapElement);
+            if (map) {
+                google.maps.event.trigger(map, 'resize');
+            }
+        }
+    }
+    
+    function resetMapView(mapId) {
+        const mapElement = document.getElementById(mapId);
+        if (window.google && window.google.maps) {
+            const map = window.google.maps.Map.get(mapElement);
+            if (map) {
+                // Get all markers on the map
+                const markers = [];
+                google.maps.event.addListenerOnce(map, 'idle', () => {
+                    // Find all markers on this map
+                    const mapDiv = map.getDiv();
+                    const markerElements = mapDiv.querySelectorAll('[title]');
+                    
+                    if (markerElements.length > 0) {
+                        const bounds = new google.maps.LatLngBounds();
+                        markerElements.forEach(element => {
+                            const marker = element.__gm;
+                            if (marker && marker.getPosition) {
+                                bounds.extend(marker.getPosition());
+                            }
+                        });
+                        
+                        if (!bounds.isEmpty()) {
+                            map.fitBounds(bounds);
+                            // Add padding
+                            google.maps.event.addListenerOnce(map, 'bounds_changed', () => {
+                                const currentBounds = map.getBounds();
+                                if (currentBounds) {
+                                    const ne = currentBounds.getNorthEast();
+                                    const sw = currentBounds.getSouthWest();
+                                    const latSpan = ne.lat() - sw.lat();
+                                    const lngSpan = ne.lng() - sw.lng();
+                                    
+                                    const newNe = new google.maps.LatLng(ne.lat() + latSpan * 0.1, ne.lng() + lngSpan * 0.1);
+                                    const newSw = new google.maps.LatLng(sw.lat() - latSpan * 0.1, sw.lng() - lngSpan * 0.1);
+                                    const paddedBounds = new google.maps.LatLngBounds(newSw, newNe);
+                                    map.fitBounds(paddedBounds);
+                                }
+                            });
+                        }
+                    } else {
+                        map.setZoom(12);
+                    }
+                });
+            }
+        }
+    }
+</script>
+{% endblock %} 

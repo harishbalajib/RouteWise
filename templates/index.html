@@ -1,0 +1,210 @@
+{% extends "base.html" %}
+
+{% block title %}Plan Your Trip - Smart US Travel Planner{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>Plan Your Travel Itinerary</h2>
+    <p>Enter your destinations and preferences to get an optimized travel plan.</p>
+    
+    <form method="POST" action="/plan">
+        <div class="grid">
+            <div>
+                <div class="form-group">
+                    <label for="start_time">Daily Start Time</label>
+                    <input type="time" id="start_time" name="start_time" class="form-control" value="09:00" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="end_time">Daily End Time</label>
+                    <input type="time" id="end_time" name="end_time" class="form-control" value="18:00" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="num_days">Number of Days</label>
+                    <input type="number" id="num_days" name="num_days" class="form-control" min="1" max="14" value="1" required>
+                </div>
+            </div>
+            
+            <div>
+                <div class="form-group">
+                    <label for="travel_mode">Travel Mode</label>
+                    <select id="travel_mode" name="travel_mode" class="form-control" required>
+                        <option value="driving" selected>Driving</option>
+                        <option value="walking">Walking</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h3>Destinations</h3>
+            <p>Add the places you want to visit. Include their addresses, opening hours, and how long you want to spend at each location.</p>
+            
+            <div id="places-container">
+                <div class="place-card">
+                    <h3>Place 1</h3>
+                    <div class="place-inputs">
+                        <div class="form-group">
+                            <label for="place_name_0">Place Name</label>
+                            <div class="search-container">
+                                <input type="text" id="place_name_0" name="place_name" class="form-control place-name-search" placeholder="e.g., Statue of Liberty" required>
+                                <div class="search-results" id="place-search-results-0"></div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="address_0">Address</label>
+                            <div class="search-container">
+                                <input type="text" id="address_0" name="address" class="form-control address-search" placeholder="Search for a place..." required>
+                                <div class="search-results" id="search-results-0"></div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="open_time_0">Opening Time</label>
+                            <input type="time" id="open_time_0" name="open_time" class="form-control" value="09:00" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="close_time_0">Closing Time</label>
+                            <input type="time" id="close_time_0" name="close_time" class="form-control" value="17:00" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="visit_duration_0">Visit Duration (minutes)</label>
+                            <input type="number" id="visit_duration_0" name="visit_duration" class="form-control" min="1" max="480" value="60" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="preference_0">Preference (1-5)</label>
+                            <select id="preference_0" name="preference" class="form-control" required>
+                                <option value="1">1 - Low</option>
+                                <option value="2">2</option>
+                                <option value="3" selected>3 - Medium</option>
+                                <option value="4">4</option>
+                                <option value="5">5 - High</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="preferred_start_time_0">Preferred Start Time (Optional)</label>
+                            <input type="time" id="preferred_start_time_0" name="preferred_start_time" class="form-control">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="preferred_end_time_0">Preferred End Time (Optional)</label>
+                            <input type="time" id="preferred_end_time_0" name="preferred_end_time" class="form-control">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="timing_importance_0">Timing Importance (1-5)</label>
+                            <select id="timing_importance_0" name="timing_importance" class="form-control" required>
+                                <option value="1" selected>1 - Low</option>
+                                <option value="2">2</option>
+                                <option value="3">3 - Medium</option>
+                                <option value="4">4</option>
+                                <option value="5">5 - High</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="place-card">
+                    <h3>Place 2</h3>
+                    <div class="place-inputs">
+                        <div class="form-group">
+                            <label for="place_name_1">Place Name</label>
+                            <div class="search-container">
+                                <input type="text" id="place_name_1" name="place_name" class="form-control place-name-search" placeholder="e.g., Central Park" required>
+                                <div class="search-results" id="place-search-results-1"></div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="address_1">Address</label>
+                            <div class="search-container">
+                                <input type="text" id="address_1" name="address" class="form-control address-search" placeholder="Search for a place..." required>
+                                <div class="search-results" id="search-results-1"></div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="open_time_1">Opening Time</label>
+                            <input type="time" id="open_time_1" name="open_time" class="form-control" value="06:00" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="close_time_1">Closing Time</label>
+                            <input type="time" id="close_time_1" name="close_time" class="form-control" value="22:00" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="visit_duration_1">Visit Duration (minutes)</label>
+                            <input type="number" id="visit_duration_1" name="visit_duration" class="form-control" min="1" max="480" value="90" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="preference_1">Preference (1-5)</label>
+                            <select id="preference_1" name="preference" class="form-control" required>
+                                <option value="1">1 - Low</option>
+                                <option value="2">2</option>
+                                <option value="3" selected>3 - Medium</option>
+                                <option value="4">4</option>
+                                <option value="5">5 - High</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="preferred_start_time_1">Preferred Start Time (Optional)</label>
+                            <input type="time" id="preferred_start_time_1" name="preferred_start_time" class="form-control">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="preferred_end_time_1">Preferred End Time (Optional)</label>
+                            <input type="time" id="preferred_end_time_1" name="preferred_end_time" class="form-control">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="timing_importance_1">Timing Importance (1-5)</label>
+                            <select id="timing_importance_1" name="timing_importance" class="form-control" required>
+                                <option value="1" selected>1 - Low</option>
+                                <option value="2">2</option>
+                                <option value="3">3 - Medium</option>
+                                <option value="4">4</option>
+                                <option value="5">5 - High</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="button" class="remove-place" onclick="removePlace(this)">Remove Place</button>
+                </div>
+            </div>
+            
+            <button type="button" class="add-place" onclick="addPlace()">Add Another Place</button>
+        </div>
+        
+        <div style="text-align: center; margin-top: 2rem;">
+            <button type="submit" class="btn">Plan My Trip</button>
+        </div>
+    </form>
+</div>
+
+<div class="card">
+    <h3>How It Works</h3>
+    <div class="grid">
+        <div>
+            <h4>Algorithms</h4>
+            <ul>
+                <li><strong>Greedy:</strong> Nearest neighbor approach - fast and simple</li>
+                <li><strong>OR-Tools:</strong> Google's optimization solver for optimal solutions</li>
+                <li><strong>Brute Force:</strong> Exhaustive search - guaranteed optimal for small datasets</li>
+                <li><strong>Dynamic Programming:</strong> Classic TSP solution with memoization</li>
+                <li><strong>Optimal:</strong> Finds truly optimal route by trying all starting points</li>
+                <li><strong>Genetic Annealing:</strong> Hybrid approach combining genetic algorithms with simulated annealing</li>
+            </ul>
+        </div>
+        <div>
+            <h4>Features</h4>
+            <ul>
+                <li>Time window constraints</li>
+                <li>Travel time optimization</li>
+                <li>Daily itinerary splitting</li>
+                <li>Interactive route maps</li>
+                <li>Preferred timing with importance weighting</li>
+                <li>Automatic opening hours detection</li>
+                <li>Place ratings and business information</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %} 
