@@ -36,7 +36,7 @@ A travel planning application built with FastAPI and Python, designed to optimiz
 
 1. Clone the repository:
 ```bash
-git clone <repository-url>
+git clone https://github.com/harishbalajib/RouteWise.git
 cd RouteWise
 ```
 2. Install dependencies:
